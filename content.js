@@ -79,14 +79,14 @@ function unmarkHideOriginal(thumbnailAnchor) {
 
 function applyFrameToOverlay(overlay, frame) {
   // frame: { url, w, h, cols, rows, col, row }
-  const bgSizeW = frame.cols * frame.w;
-  const bgSizeH = frame.rows * frame.h;
-  const x = -(frame.col * frame.w);
-  const y = -(frame.row * frame.h);
+  const sizeW = frame.cols * 100;
+  const sizeH = frame.rows * 100;
+  const posX = frame.cols === 1 ? 0 : (frame.col / (frame.cols - 1)) * 100;
+  const posY = frame.rows === 1 ? 0 : (frame.row / (frame.rows - 1)) * 100;
 
   overlay.style.backgroundImage = `url("${frame.url}")`;
-  overlay.style.backgroundSize = `${bgSizeW}px ${bgSizeH}px`;
-  overlay.style.backgroundPosition = `${x}px ${y}px`;
+  overlay.style.backgroundSize = `${sizeW}% ${sizeH}%`;
+  overlay.style.backgroundPosition = `${posX}% ${posY}%`;
   overlay.style.backgroundColor = "";
 }
 
