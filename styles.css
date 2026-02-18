@@ -1,0 +1,22 @@
+/* Overlay that becomes the "new thumbnail" */
+.hp-storyboard-overlay {
+  position: absolute;
+  inset: 4px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: cover;
+  z-index: 3;
+  border-radius: 10px;
+}
+
+/* Ensure the thumbnail container can host an absolute overlay */
+ytd-thumbnail,
+a#thumbnail,
+a.yt-lockup-view-model__content-image {
+  position: relative;
+}
+
+/* Hide the original <img> behind the overlay (but keep layout) */
+.hp-hide-thumb img {
+  opacity: 0 !important;
+}
