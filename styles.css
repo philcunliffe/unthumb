@@ -1,7 +1,7 @@
 /* Overlay that becomes the "new thumbnail" */
 .hp-storyboard-overlay {
   position: absolute;
-  inset: 4px;
+  inset: -1px;
   background-repeat: no-repeat;
   background-position: 0 0;
   background-size: cover;
@@ -12,8 +12,16 @@
 /* Ensure the thumbnail container can host an absolute overlay */
 ytd-thumbnail,
 a#thumbnail,
-a.yt-lockup-view-model__content-image {
+a.yt-lockup-view-model__content-image,
+yt-thumbnail-view-model {
   position: relative;
+}
+
+/* Let the duration badge (and other bottom overlays) sit above our overlay */
+yt-thumbnail-bottom-overlay-view-model,
+ytd-thumbnail-overlay-time-status-renderer {
+  position: relative;
+  z-index: 4;
 }
 
 /* Hide the original <img> behind the overlay (but keep layout) */

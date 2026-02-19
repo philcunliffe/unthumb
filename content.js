@@ -57,12 +57,15 @@ function findThumbnailAnchors(root = document) {
 }
 
 function ensureOverlay(thumbnailAnchor) {
-  // Overlay should sit inside the anchor so it's clickable
-  let overlay = thumbnailAnchor.querySelector(":scope > .hp-storyboard-overlay");
+  // Place overlay inside yt-thumbnail-view-model (new renderer) so it matches
+  // the actual thumbnail bounds, not the full anchor which may be taller.
+  // Fall back to the anchor itself for the legacy renderer.
+  const container = thumbnailAnchor.querySelector("yt-thumbnail-view-model") || thumbnailAnchor;
+  let overlay = container.querySelector(":scope > .hp-storyboard-overlay");
   if (!overlay) {
     overlay = document.createElement("div");
     overlay.className = "hp-storyboard-overlay";
-    thumbnailAnchor.appendChild(overlay);
+    container.appendChild(overlay);
   }
   return overlay;
 }
@@ -115,10 +118,18 @@ function handleFailure(thumbnailAnchor, overlay) {
 
 async function patchAnchor(thumbnailAnchor) {
   if (seen.has(thumbnailAnchor)) return;
-  seen.add(thumbnailAnchor);
 
   const videoId = getVideoIdFromAnchor(thumbnailAnchor);
   if (!videoId) return;
+
+  // For new lockup renderer, wait until yt-thumbnail-view-model exists so the
+  // overlay is placed inside it (not the taller <a> which bleeds into the text).
+  if (thumbnailAnchor.matches('a.yt-lockup-view-model__content-image') &&
+      !thumbnailAnchor.querySelector('yt-thumbnail-view-model')) {
+    return; // MutationObserver will retry when child elements appear
+  }
+
+  seen.add(thumbnailAnchor);
 
   try {
     const overlay = ensureOverlay(thumbnailAnchor);
@@ -154,6 +165,12 @@ const mo = new MutationObserver((mutations) => {
         patchAnchor(node);
       }
       for (const a of findThumbnailAnchors(node)) patchAnchor(a);
+      // When yt-thumbnail-view-model is added inside an anchor we skipped
+      // earlier, retry that anchor now.
+      if (node.tagName === 'YT-THUMBNAIL-VIEW-MODEL') {
+        const parentAnchor = node.closest(THUMB_SELECTOR);
+        if (parentAnchor) patchAnchor(parentAnchor);
+      }
     }
   }
 });
